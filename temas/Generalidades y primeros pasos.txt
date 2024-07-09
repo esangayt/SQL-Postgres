@@ -1,0 +1,73 @@
+||-- create table users (
+--   name varchar(10) unique
+-- );
+
+-- INSERT INTO users (name) VALUES ('Alice');
+-- INSERT INTO users (name) VALUES ('Bob');
+INSERT INTO users
+VALUES ('xob5');
+
+-- UPDATE users SET name = 'Bob' WHERE name = 'Bob2';
+
+-- SET autocommit = OFF;
+-- auto commit;
+-- commit;
+-- rollback;
+
+SELECT *
+FROM users;
+-- select * from users where name = 'Bob';
+-- select * from users where name = 'Bob2';
+-- SELECT * FROM users limit 2 offset 3;
+-- SELECT * FROM users WHERE name LIKE '_ob%';
+
+DELETE
+FROM users
+WHERE name = 'Bob';
+DROP TABLE users;
+
+DROP TABLE users;
+-- Create table
+CREATE TABLE users
+(
+    id   serial,
+    name VARCHAR(100)
+);
+
+-- String Operators
+
+SELECT id, UPPER(name)
+from users;
+
+SELECT concat(id, ' ', name) as datos
+FROM users;
+
+SELECT id,
+       upper(name)           as upp,
+       LOWER(name)           as low,
+       LENGTH(name)          as len,
+       LEFT(name, 2)         as lef,
+       RIGHT(name, 2)        as righ,
+       SUBSTRING(name, 2, 2) as sub,
+       name
+FROM users;
+
+-- SUBSTRING POSITION
+SELECT name,
+       substring(name, 5, 2),
+       position(' ' in name),
+       substring(name, 1, position(' ' in name))  as first_name,
+       substring(name, position(' ' in name) + 1) as last_name
+FROM users;
+
+
+select concat(fnln.first_name, ' ', fnln.last_name) as full_name
+from (SELECT substring(name, 1, position(' ' in name))  as first_name,
+             substring(name, position(' ' in name) + 1) as last_name
+      FROM users) as fnln;
+
+UPDATE users
+SET
+    first_name = substring(name, 1, position(' ' in name)),
+    last_name  = substring(name, position(' ' in name) + 1)
+WHERE first_name IS NULL and last_name IS NULL;
