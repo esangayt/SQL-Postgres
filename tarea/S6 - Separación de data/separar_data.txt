@@ -1,0 +1,44 @@
+create table Continent
+(
+    id   serial primary key,
+    name varchar(255) NOT NULL
+);
+
+insert into Continent (id, name)
+values ('Asia');
+
+insert into Continent (name)
+select distinct continent
+from country;
+
+select distinct continent
+from country;
+
+-- create backup of country
+create table country_backup as
+select *
+from country;
+
+select name,
+       continent,
+       (select id
+        from Continent
+        where Continent.name = country.continent) as continent_id
+from country;
+
+
+update country
+set continent = (select id
+                 from Continent
+                 where Continent.name = country.continent);
+
+select *
+from country;
+-- change typy of continent to int4
+alter table country
+    alter column continent
+        type int4 using continent::int4;
+
+alter table country
+    add constraint fk_country_continent
+        foreign key (continent) references Continent (id);
