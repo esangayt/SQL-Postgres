@@ -1,0 +1,6 @@
+SELECT count(*) total, b.name, a.countrycode from city a
+join country b on a.countrycode = b.code
+group by b.name, a.countrycode
+order by total desc
+limit 1
+;

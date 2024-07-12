@@ -1,0 +1,71 @@
+-- ############ AGRUPACIONES MULTIPLES CON JOINS
+-- Quiero saber los idiomas oficilaes que se hablasn por continente
+
+select count(*), ipc.continente
+from (select distinct c.name as continente, a.language as idioma
+      from countrylanguage a
+               join country b on a.countrycode = b.code
+               join continent c on b.continent = c.code
+      where a.isofficial = true) as ipc
+group by ipc.continente
+;
+
+-- nombre del idioma basado en la tabal de lenguajes
+select distinct c.name as continente, l.name as idioma
+from countrylanguage a
+         join language l on a.languagecode = l.code
+         join country b on a.countrycode = b.code
+         join continent c on b.continent = c.code
+where a.isofficial = true;
+
+-- #
+-- ##
+-- ###
+-- ####
+-- ¿Cuál es el idioma (y código del idioma) oficial más hablado por
+-- diferentes países en Europa?
+-- paises que más hablan ese idiomas
+select count(*) total, l.name lenguaje
+from countrylanguage ct
+         join language l on ct.languagecode = l.code
+         join country c on ct.countrycode = c.code
+         join continent cn on c.continent = cn.code
+where ct.isofficial = true
+  and cn.name = 'Europe'
+group by l.name
+order by total desc
+limit 1
+
+;
+
+select *
+from countrylanguage
+where isofficial = true;
+
+select *
+from country;
+
+select *
+from continent;
+
+Select *
+from "language";
+
+-- Listado de todos los países cuyo idioma oficial es el más hablado
+-- de Europa
+-- (no hacer subquery, tomar el código anterior)
+
+select c.name from countrylanguage cl
+join country c on cl.countrycode = c.code
+where isofficial = true and cl.languagecode = 135;
+
+select count(*) total, l.name lenguaje, l.code codigo
+from countrylanguage ct
+         join language l on ct.languagecode = l.code
+         join country c on ct.countrycode = c.code
+         join continent cn on c.continent = cn.code
+where ct.isofficial = true
+  and cn.name = 'Europe'
+group by l.name, l.code
+order by total desc
+limit 1;
