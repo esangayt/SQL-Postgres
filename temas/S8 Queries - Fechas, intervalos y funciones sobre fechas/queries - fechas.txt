@@ -1,0 +1,43 @@
+select now(),
+--        current_date,
+--        current_time,
+       date_part('year', now()),
+       date_part('month', now()),
+       date_part('day', now()),
+       date_part('hour', now()),
+       date_part('minute', now()),
+       date_part('second', now());
+
+select first_name, hire_date
+from employees
+;
+
+-- funciones agregadas con fechas
+-- suma 1 mes
+select max(hire_date),
+--        max(hire_date) + interval '1 month',
+--        max(hire_date) + interval '10 days',
+--        max(hire_date) + interval '1 year',
+--        max(hire_date) + interval '1.1 year',
+       max(hire_date) + make_interval(years := 23)
+from employees;
+
+select current_date, DATE_PART('years', current_date), now() + make_interval(years := 23);
+
+select hire_date,
+       MAKE_INTERVAL(years := 2024 - extract(years from hire_date)::integer),
+       MAKE_INTERVAL(years := DATE_PART('years', current_date)::integer - extract(years from hire_date)::integer)
+from employees;
+
+-- actulizar la bd de empleados
+-- se le sume el año actual - el año de contratación
+update employees
+set hire_date = hire_date + MAKE_INTERVAL(years := DATE_PART('years', current_date)::integer -
+                                                   extract(years from hire_date)::integer);
+
+select *
+from employees
+where employee_id = 178;
+
+update employees
+set hire_date = hire_date + interval '24 years'
