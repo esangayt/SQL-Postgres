@@ -1,0 +1,19 @@
+enum product_status {
+  in_stock
+  out_of_stokck
+  running_low
+}
+
+table product {
+  id int [pk, increment]
+  serial varchar
+  name varchar(200)
+  merchant varchar
+  price float(8.2)
+  status product_status
+  stock int
+  created_at timestamp [default: 'now()']
+
+}
+//varios provedores tienen el
+// mismo producto
