@@ -1,0 +1,29 @@
+table user{
+  id int [pk, increment]
+  name varchar(100)
+  slug varchar(50)
+  email varchar(unique)
+  bio text
+  created_at timestamp [default: 'now()']
+}
+
+table tweet {
+  ind int [pk,  increment]
+  content varchar(150)
+  user_id int
+  created_at timestamp [default: 'now()']
+}
+
+table follower {
+  id int [pk,  increment]
+  follower_id int
+  followed_id int
+  created_at timestamp [default: 'now()']
+}
+
+Ref: "user"."id" < "tweet"."user_id"
+
+
+Ref: "user"."id" < "follower"."followed_id"
+
+Ref: "user"."id" < "follower"."follower_id"
