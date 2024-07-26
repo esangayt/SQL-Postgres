@@ -1,19 +1,59 @@
 enum product_status {
   in_stock
-  out_of_stokck
+  out_of_stock
   running_low
+}
+
+enum order_status {
+  placed
+  confirmed
+  processed
+  pick_up
 }
 
 table product {
   id int [pk, increment]
   serial varchar
   name varchar(200)
-  merchant varchar
+  merchant int 
   price float(8.2)
   status product_status
   stock int
   created_at timestamp [default: 'now()']
-
 }
 //varios provedores tienen el
 // mismo producto
+table merchant{
+  id int [pk, increment]
+  name varchar
+  country int //Puede ser nueva tb
+  created_at timestamp [default: 'now()']
+}
+
+table country {
+  id int [pk, increment]
+  name varchar
+}
+
+table ordenPago{
+  id int [pk, increment]
+  status order_status
+  user_id int
+  total float(12,2)
+
+  created_at timestamp [default: 'now()']
+}
+
+table order_item {
+  id int [pk, increment]
+  order_id int
+  product_id int
+  quantity int
+}
+
+Ref: "merchant"."id" < "product"."merchant"
+Ref: "country"."id" < "merchant"."country"
+
+Ref: "ordenPago"."id" < "order_item"."order_id"
+
+Ref: "product"."id" < "order_item"."product_id"
