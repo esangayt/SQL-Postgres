@@ -1,0 +1,10 @@
+-- Mostrar nombre de cada id en followers
+select u.name, f.leader_id, f.follower_id, u2.name
+from followers f
+JOIN "user" u ON f.leader_id = u.id
+join "user" u2 on f.follower_id = u2.id;
+;
+-- u = leader, u2=follower
+
+
+select * from "user";

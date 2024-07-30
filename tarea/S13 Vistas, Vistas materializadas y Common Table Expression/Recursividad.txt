@@ -1,0 +1,17 @@
+with recursive coutdown (val) as
+                   (select 5 as val
+                    union
+                    select val - 1
+                    from coutdown
+                    where val > 1)
+select *
+from coutdown;
+
+with recursive coutup (val) as
+                   (select 1 as val
+                    union
+                    select val + 1
+                    from coutup
+                    where val < 10)
+select *
+from coutup;

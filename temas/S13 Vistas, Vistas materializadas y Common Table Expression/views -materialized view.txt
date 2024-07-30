@@ -1,0 +1,58 @@
+select date_trunc('week', created_at) as week, count(*) as posts
+from posts
+group by week
+order by week desc;
+
+select date_trunc('week', posts.created_at) as week, count(*) as posts
+from posts
+         join claps on posts.post_id = claps.post_id
+group by week
+order by week desc;
+
+create view comments_per_week as
+-- Número de claps por semana y suma total de claps por post
+select date_trunc('week', posts.created_at) as week,
+       count(distinct posts.post_id)        as number_of_posts,
+       sum(claps.counter)                   as total_claps,
+       count(*)                             as number_of_claps
+from posts
+         join claps on posts.post_id = claps.post_id
+-- where posts.post_id = 259
+group by week
+order by week desc;
+
+
+select *
+from posts
+where post_id = 259;
+
+select *
+from claps
+where post_id = 259;
+
+select *
+from comments_per_week;
+
+drop view comments_per_week;
+
+
+create materialized view comments_per_week_mat as
+select date_trunc('week', posts.created_at) as week,
+       count(distinct posts.post_id)        as number_of_posts,
+       sum(claps.counter)                   as total_claps,
+       count(*)                             as number_of_claps
+from posts
+         join claps on posts.post_id = claps.post_id
+group by week
+order by week desc;
+
+
+select *
+from comments_per_week;
+select *
+from comments_per_week_mat;
+refresh materialized view comments_per_week_mat;
+
+-- ===== Cambiar nombre view y materialized view ====
+    alter view comments_per_week rename to comments_per_week_v2;
+alter materialized view comments_per_week_mat rename to comments_per_week_mat_v2;

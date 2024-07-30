@@ -1,0 +1,158 @@
+
+
+with posts_week_2024 as
+         (SELECT date_trunc('week'::text, posts.created_at) AS weeks,
+                 sum(claps.counter)                         AS total_claps,
+                 count(DISTINCT posts.post_id)              AS number_of_posts,
+                 count(*)                                   AS number_of_claps
+          FROM posts
+                   JOIN claps ON claps.post_id = posts.post_id
+          GROUP BY (date_trunc('week'::text, posts.created_at))
+          ORDER BY (date_trunc('week'::text, posts.created_at)) DESC)
+select *
+from posts_week_2024
+where weeks between '2022-01-01' and '2024-12-31'
+  and total_claps >= 600;
+
+with claps_per_post as
+    (select claps.post_id, sum(counter)
+     from claps
+     group by post_id)
+   , posts_from_2023 as (select *
+                         from posts
+                         where created_at between '2023-01-01' and '2023-12-31')
+select *
+from claps_per_post p
+         join posts_from_2023 p2 on p.post_id = p2.post_id;
+
+-- ====== Recrusivo ======
+
+-- val = resultado por ejecución
+with recursive multiplication_table(base, val, result) as
+                   (
+                       --     init valores de inicialización
+                       select 5 as base, 1 as val, 5 * 1 as result
+                       --     values (5, 1, 5) cada valor es una valor de la cabecera
+                       union
+                       --     Recursiva
+                       select base, val + 1, base * (val + 1) as result
+                       from multiplication_table
+                       where val < 10)
+select *
+from multiplication_table;
+
+
+-- ====== Recursivo con Empleados ======
+with recursive employees_tree as
+(
+select employee_id, name, reports_to
+    from employees
+--         where reports_to is null
+        where employee_id = 5
+union
+    select e.employee_id, e.name, e.reports_to
+        from employees e
+    join employees_tree et on e.reports_to = et.employee_id
+)
+select *
+from employees_tree;
+
+-- ====== Recursivo con Empleados con Profundidad ======
+with recursive employees_tree as
+(
+select employee_id, name, reports_to, 1 as depth
+    from employees
+--         where reports_to is null
+        where employee_id = 5
+union
+    select e.employee_id, e.name, e.reports_to, depth + 1
+        from employees e
+    join employees_tree et on e.reports_to = et.employee_id
+        where depth < 2
+)
+select *
+from employees_tree;
+
+-- ====== Recursivo con Empleados con Profundidad y Jefe ======
+with recursive employees_tree as
+    ( -- Init
+        select employee_id,
+               name,
+               reports_to,
+               (select name from employees em where employee_id = e.reports_to) as boss,
+                1 as depth
+        from employees e
+        where employee_id = 5
+        union
+        -- Recursive
+        select e.employee_id,
+               e.name,
+               e.reports_to,
+               (select name from employees where employee_id = e.reports_to) as boss,
+                depth + 1
+        from employees e
+                 join employees_tree et on e.reports_to = et.employee_id
+        where depth < 2
+    )
+select * from employees_tree;
+
+-- ====== Recursivo con Empleados con Profundidad y Jefe Left Join ======
+with recursive employees_tree as
+(
+select employee_id, name, reports_to, 1 as depth
+    from employees
+--         where reports_to is null
+        where employee_id = 1
+union
+    select e.employee_id, e.name, e.reports_to, depth + 1
+        from employees e
+    join employees_tree et on e.reports_to = et.employee_id
+        where depth < 7
+)
+select *
+from employees_tree et
+left join employees e on et.reports_to = e.employee_id
+order by depth
+;
+
+
+
+select  employee_id, name, reports_to,
+        (select name from employees b where employee_id = a.reports_to) as boss
+from employees a where employee_id = 5;
+
+select name from employees where employee_id = 3;
+
+create table employees
+(
+    employee_id int primary key,
+    name        text,
+    reports_to  int
+);
+
+select *
+from employees;
+
+-- update id 10
+update employees
+set name = 'Presidente Karla'
+where employee_id = 10;
+
+insert into employees (employee_id, name, reports_to)
+values (1, 'Jefe Carlos', null);
+
+insert into employees (employee_id, name, reports_to)
+values (2, 'SubJefe Susana', 1),
+       (3, 'SubJefe Juan', 1),
+       (4, 'Gerente Pedro', 3),
+       (5, 'Gerente Melissa', 3),
+       (6, 'Gerente Carmen', 2),
+       (7, 'SubGerente Ramiro', 5),
+       (8, 'Programador Fernando', 7),
+       (9, 'Programador Eduardo', 7),
+       (10, 'Presidente Carlos', null);
+
+
+
+select * from employees;
+
