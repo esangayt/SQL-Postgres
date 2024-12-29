@@ -1,3 +1,5 @@
+-- ================== BD: MEDIUM -> DJANGO REST
+
 -- 1. Cuantos Post hay - 1050
 select count(*)
 from posts;
