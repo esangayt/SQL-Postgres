@@ -13,7 +13,7 @@ CREATE DATABASE Example01 ON PRIMARY
         MAXSIZE = 50 MB,
         FILEGROWTH = 1 MB
 
-        );
+);
 
 -- Muestra la estructura de la base de datos
 sp_helpdb Example01;
