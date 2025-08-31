@@ -1,0 +1,90 @@
+-- 1. INNER JOIN
+SELECT C.NOMBRE, P.FECHA_PEDIDO
+FROM CLIENT C
+         JOIN dbo.PEDIDOS P on C.ID = P.ID_CLIENTE
+
+-- 2. LEFT JOIN
+SELECT C.NOMBRE, SUM(p.CANTIDAD)
+FROM CLIENT C
+         LEFT JOIN dbo.PEDIDOS P on C.ID = P.ID_CLIENTE
+GROUP BY C.NOMBRE
+
+-- 3. ENCONTRAR LOS CLIENTES CON MAYOR N DE COMPRAS EN EL ÚLTIMO AÑO
+SELECT C.NOMBRE, SUM(F.TOTAL) AS TOTAL_COMPRAS
+FROM CLIENT C
+         JOIN PEDIDOS P ON C.ID = P.ID_CLIENTE
+         JOIN Facturas F ON F.IDPEDIDO = P.ID
+         JOIN PRODUCTOS PR ON P.ID_PRODUCTO = PR.ID
+-- WHERE DATEPART(yy, F.FECHA_FACTURA ) = DATEPART(YY,DATEADD(YEAR, -1, GETDATE()))
+WHERE YEAR(F.FECHA_FACTURA) = YEAR(DATEADD(YEAR, -1, '2026'))
+-- >= Solo fechas mayores o iguales al año pasado, FECHAS DEL AÑO PASADO EN ADELANTE
+--  = Solo el año pasado, FECHAS DEL AÑO PASADO SOLAMENTE
+GROUP BY C.NOMBRE
+
+SELECT GETDATE()                                               AS fecha_actual,
+       DATEADD(YEAR, -1, GETDATE())                            AS fecha_un_año_atras, -- QUÉ, CUÁNTO, DÓNDE
+       YEAR(DATEADD(YEAR, -1, GETDATE()))                      AS año_anterior_al_actual,
+       DATEDIFF(YEAR, DATEADD(YEAR, -1, GETDATE()), GETDATE()) AS diferencia_años
+
+-- 4. Obtener el promedio de ventas diarias por cliente en el ultimo mes
+-- Muestra los clientes que han realizado compras en el último mes
+SELECT C.NOMBRE, AVG(F.TOTAL) AS PROMEDIO_VENTAS
+FROM CLIENT C
+         JOIN PEDIDOS P ON C.ID = P.ID_CLIENTE
+         JOIN Facturas F ON F.IDPEDIDO = P.ID
+WHERE MONTH(F.FECHA_FACTURA) = MONTH(GETDATE()) -- ULTIMO MES
+  AND YEAR(F.FECHA_FACTURA) = YEAR(GETDATE())   -- AÑO ACTUAL
+GROUP BY C.NOMBRE
+-- HAVING COUNT(DISTINCT DATEPART(DD, F.FECHA_FACTURA))>=1
+-- CONSIDERAR VALORES MAYOR AL PRIMER DIA DEL MES
+
+
+SELECT C.NOMBRE, f.FECHA_FACTURA, AVG(F.TOTAL) AS PROMEDIO_VENTAS
+FROM CLIENT C
+         JOIN PEDIDOS P ON C.ID = P.ID_CLIENTE
+         JOIN Facturas F ON F.IDPEDIDO = P.ID
+WHERE MONTH(F.FECHA_FACTURA) = MONTH(GETDATE()) -- ULTIMO MES
+  AND YEAR(F.FECHA_FACTURA) = YEAR(GETDATE())   -- AÑO ACTUAL
+GROUP BY C.NOMBRE, f.FECHA_FACTURA
+
+-- Clientes que realizaron compras en 5 o más días distintos del mes actual:
+SELECT C.NOMBRE,
+       AVG(F.TOTAL) AS PROMEDIO_VENTAS
+--     COUNT(DISTINCT DATEPART(DD, F.FECHA_FACTURA)) AS DIAS_DISTINTOS
+FROM CLIENT C
+         LEFT JOIN PEDIDOS P ON C.ID = P.ID_CLIENTE
+         LEFT JOIN Facturas F ON F.IDPEDIDO = P.ID
+    AND MONTH(F.FECHA_FACTURA) = MONTH(GETDATE())
+    AND YEAR(F.FECHA_FACTURA) = YEAR(GETDATE())
+GROUP BY C.NOMBRE
+HAVING COUNT(DISTINCT DATEPART(DD, F.FECHA_FACTURA)) >= 5
+-- Calcula:
+-- El promedio de sus ventas en el mes  AVG(F.TOTAL) AS PROMEDIO_VENTAS
+-- Cuántos días distintos del mes compraron COUNT(DISTINCT DATEPART(DD, F.FECHA_FACTURA)) >= 5
+-- Solo muestra clientes que compraron al menos en X días distintos.
+-- ===== HAVING se aplica a cada grupo ya formado por el GROUP BY, no a las filas individuales =====
+-- Funciones de agregación como COUNT, SUM, AVG, etc. se pueden usar en HAVING pese no estar definidas en select
+-- HAVING FILTRA GRUPOS
+-- WHERE FILTRA FILAS
+
+-- OBTENER INFORMACIÓN DE FACTURAS Y SUS PEDIDOS, OBTIENE LA FACTURA MÁXIMA
+SELECT F.IdFactura,
+       F.FECHA_FACTURA,
+       P.ID     AS ID_PEDIDO,
+       P.CANTIDAD,
+       C.NOMBRE AS NOMBRE_CLIENTE
+FROM Facturas F
+         JOIN PEDIDOS P ON F.IDPEDIDO = P.ID
+         JOIN CLIENT C ON P.ID_CLIENTE = C.ID
+WHERE F.IdFactura = (SELECT MAX(IdFactura) FROM Facturas)
+
+-- ULTIMA FACTURA DE CADA CLIENTE
+SELECT C.NOMBRE,
+       F.IdFactura,
+       F.FECHA_FACTURA
+FROM CLIENT C
+         JOIN PEDIDOS P ON C.ID = P.ID_CLIENTE
+         JOIN Facturas F ON F.IDPEDIDO = P.ID
+WHERE F.FECHA_FACTURA = (SELECT MAX(FECHA_FACTURA)
+                          FROM Facturas
+                          WHERE IDPEDIDO IN (SELECT ID FROM PEDIDOS WHERE ID_CLIENTE = C.ID))
